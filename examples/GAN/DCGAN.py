@@ -66,7 +66,7 @@ class Model(GANModelDesc):
     @auto_reuse_variable_scope
     def discriminator(self, imgs):
         nf = 16
-        with argscope(Conv2D, activation=tf.identity, kernel_size=4, strides=2):
+        with argscope(Conv2D, kernel_size=4, strides=2):
             l = (LinearWrap(imgs)
               .Conv2D('conv0', nf).tf.nn.leaky_relu()
               .Conv2D('conv1', nf * 2)

@@ -30,7 +30,7 @@ class Model(DCGAN.Model):
     # replace BatchNorm by LayerNorm
     @auto_reuse_variable_scope
     def discriminator(self, imgs):
-        nf = 32
+        nf = 16
         with argscope(Conv2D, activation=tf.identity, kernel_size=4, strides=2):
             l = (LinearWrap(imgs)
               .Conv2D('conv0', nf).tf.nn.leaky_relu()
@@ -46,7 +46,7 @@ class Model(DCGAN.Model):
               .LayerNorm('bn5').tf.nn.leaky_relu()
               .Conv2D('conv6', nf * 64)
               .LayerNorm('bn6').tf.nn.leaky_relu()
-              .FullyConnected('fct', 1, nl=tf.identity)())
+              .FullyConnected('fct', 1, activation=tf.identity)())
         return tf.reshape(l, [-1])
 
     
