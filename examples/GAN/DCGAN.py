@@ -66,7 +66,7 @@ class Model(GANModelDesc):
     @auto_reuse_variable_scope
     def discriminator(self, imgs):
         nf = 16
-        imgs = tf.reshape(imgs, [-1, 512, 512, 3])
+        imgs = tf.reshape(imgs, [-1, 256, 256, 3])
         with argscope(Conv2D, nl=tf.identity, kernel_shape=4, stride=2), \
                 argscope(LeakyReLU, alpha=0.2):
             l = (LinearWrap(imgs)
@@ -80,9 +80,6 @@ class Model(GANModelDesc):
                  .Conv2D('conv4', nf * 16)
                  .BatchNorm('bn4').LeakyReLU()
                  .Conv2D('conv5', nf * 32)
-                 .BatchNorm('bn5').LeakyReLU()
-                 .Conv2D('conv6', nf * 64)
-                 .BatchNorm('bn6').LeakyReLU()
                  .FullyConnected('fct', 1, nl=tf.identity)())
         return l
         
@@ -93,7 +90,6 @@ class Model(GANModelDesc):
         l = tf.reshape(l, [-1, 4, 4, nf * 64])
         l = BNReLU(l)
         with argscope(Conv2DTranspose, activation=BNReLU, kernel_size=4, strides=2):
-            l = Conv2DTranspose('deconv1', l, nf * 32)
             l = Conv2DTranspose('deconv2', l, nf * 16)
             l = Conv2DTranspose('deconv3', l, nf * 8)
             l = Conv2DTranspose('deconv4', l, nf * 4)
@@ -198,7 +194,7 @@ def get_args(default_batch=32, default_z_dim=512):
     parser.add_argument('--load-size', help='size to load the original images', type=int)
     parser.add_argument('--crop-size', help='crop the original images', type=int)
     parser.add_argument(
-        '--final-size', default=512, type=int,
+        '--final-size', default=256, type=int,
         help='resize to this shape as inputs to network')
     parser.add_argument('--z-dim', help='hidden dimension', type=int, default=default_z_dim)
     parser.add_argument('--batch', help='batch size', type=int, default=default_batch)

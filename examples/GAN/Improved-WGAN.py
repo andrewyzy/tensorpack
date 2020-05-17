@@ -31,7 +31,7 @@ class Model(DCGAN.Model):
     @auto_reuse_variable_scope
     def discriminator(self, imgs):
         nf = 16
-        imgs = tf.reshape(imgs, [-1, 512, 512, 3])
+        imgs = tf.reshape(imgs, [-1, 256, 256, 3])
         with argscope(Conv2D, activation=tf.identity, kernel_size=4, strides=2):
             l = (LinearWrap(imgs)
               .Conv2D('conv0', nf, activation=tf.nn.leaky_relu)
@@ -45,8 +45,6 @@ class Model(DCGAN.Model):
               .LayerNorm('ln4').tf.nn.leaky_relu()
               .Conv2D('conv5', nf * 32)
               .LayerNorm('ln5').tf.nn.leaky_relu()
-              .Conv2D('conv6', nf * 64)
-              .LayerNorm('ln6').tf.nn.leaky_relu()
               .FullyConnected('fct', 1, nl=tf.identity)())
         return tf.reshape(l, [-1])
 
