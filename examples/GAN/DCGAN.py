@@ -48,7 +48,7 @@ class Model(GANModelDesc):
 
     def generator(self, z):
         """ return an image generated from z"""
-        nf = 512
+        nf = 16
         l = FullyConnected('fc0', z, nf * 64 * 4 * 4, activation=tf.identity)
         l = tf.reshape(l, [-1, 4, 4, nf * 64])
         l = BNReLU(l)
@@ -65,7 +65,7 @@ class Model(GANModelDesc):
 
     @auto_reuse_variable_scope
     def discriminator(self, imgs):
-        nf = 512
+        nf = 16
         with argscope(Conv2D, kernel_size=4, strides=2):
             l = (LinearWrap(imgs)
                 .Conv2D('conv0', nf, activation=tf.nn.leaky_relu)
