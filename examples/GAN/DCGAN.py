@@ -166,7 +166,7 @@ def get_data():
     assert args.data
     imgs = glob.glob(args.data + '/*.png')
     print(imgs)
-    ds = ImageFromFile(imgs, channel=3, shuffle=True,resize=True)
+    ds = ImageFromFile(imgs, channel=3, shuffle=True,resize=512)
     ds = AugmentImageComponent(ds, get_augmentors())
     ds = BatchData(ds, args.batch)
     ds = MultiProcessRunnerZMQ(ds, 5)
