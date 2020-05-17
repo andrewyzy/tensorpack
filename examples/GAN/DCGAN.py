@@ -170,7 +170,6 @@ def get_data():
     ds = AugmentImageComponent(ds, get_augmentors())
     ds = BatchData(ds, args.batch)
     ds = MultiProcessRunnerZMQ(ds, 5)
-    print(ds.shape)
     return ds
 
 
