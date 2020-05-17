@@ -47,18 +47,20 @@ class Model(GANModelDesc):
         return [tf.TensorSpec((None, self.shape, self.shape, 3), tf.float32, 'input')]
 
     def generator(self, z):
-        """ return an image generated from z"""
-        nf = 64
-        l = FullyConnected('fc0', z, nf * 8 * 4 * 4, activation=tf.identity)
-        l = tf.reshape(l, [-1, 4, 4, nf * 8])
-        l = BNReLU(l)
-        with argscope(Conv2DTranspose, activation=BNReLU, kernel_size=4, strides=2):
-            l = Conv2DTranspose('deconv1', l, nf * 4)
-            l = Conv2DTranspose('deconv2', l, nf * 2)
-            l = Conv2DTranspose('deconv3', l, nf)
-            l = Conv2DTranspose('deconv4', l, 3, activation=tf.identity)
-            l = tf.tanh(l, name='gen')
-        return l
+            nf = 16
+            l = FullyConnected('fc0', z, nf * 64 * 4 * 4, nl=tf.identity)
+            l = tf.reshape(l, [-1, 4, 4, nf * 64])
+            l = BNReLU(l)
+            with argscope(Deconv2D, nl=BNReLU, kernel_shape=4, stride=2):
+                l = Deconv2D('deconv1', l, [8, 8, nf * 32])
+                l = Deconv2D('deconv2', l, [16, 16, nf * 16])
+                l = Deconv2D('deconv3', l, [32, 32, nf*8])
+                l = Deconv2D('deconv4', l, [64, 64, nf * 4])
+                l = Deconv2D('deconv5', l, [128, 128, nf * 2])
+                l = Deconv2D('deconv6', l, [256, 256, nf * 1])
+                l = Deconv2D('deconv7', l, [512, 512, 3], nl=tf.identity)
+                l = tf.tanh(l, name='gen')
+            return l
 
     @auto_reuse_variable_scope
     def discriminator(self, imgs):
