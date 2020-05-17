@@ -52,43 +52,70 @@ class Model(DCGAN.Model):
 
     
 
+    def _build_graph(self, inputs):
+        image_pos = inputs[0]
+		image_pos = image_pos / 128.0 - 1
+		z = tf.random_normal([32, 512], name='z_train')
+		z = tf.placeholder_with_default(z, [None, 512], name='z')
+		with argscope([Conv2D, Deconv2D, FullyConnected],
+					  W_init=tf.truncated_normal_initializer(stddev=0.02)):
+			with tf.variable_scope('gen'):
+				image_gen = self.generator(z)
+			tf.summary.image('generated-samples', image_gen, max_outputs=30)
+			alpha = tf.random_uniform(shape=[32, 1, 1, 1],
+									  minval=0., maxval=1., name='alpha')
+			interp = image_pos + alpha * (image_gen - image_pos)
+			with tf.variable_scope('discrim'):
+				vecpos = self.discriminator(image_pos)
+				vecneg = self.discriminator(image_gen)
+				vec_interp = self.discriminator(interp)
 
-    def build_graph(self, image_pos):
-        image_pos = image_pos[0]
-        image_pos = image_pos / 128.0 - 1
+		self.d_loss = tf.reduce_mean(vecneg - vecpos, name='d_loss')
+		self.g_loss = tf.negative(tf.reduce_mean(vecneg), name='g_loss')
+		gradients = tf.gradients(vec_interp, [interp])[0]
+		gradients = tf.sqrt(tf.reduce_sum(tf.square(gradients), [1, 2, 3]))
+		gradients_rms = symbolic_functions.rms(gradients, 'gradient_rms')
+		gradient_penalty = tf.reduce_mean(tf.square(gradients - 1), name='gradient_penalty')
+		add_moving_summary(self.d_loss, self.g_loss, gradient_penalty, gradients_rms)
+		self.d_loss = tf.add(self.d_loss, 10 * gradient_penalty)
+		self.collect_variables()
 
-        z = tf.random_normal([self.batch, self.zdim], name='z_train')
-        z = tf.placeholder_with_default(z, [None, self.zdim], name='z')
+    # def build_graph(self, image_pos):
+    #     image_pos = image_pos[0]
+    #     image_pos = image_pos / 128.0 - 1
 
-        with argscope([Conv2D, Conv2DTranspose, FullyConnected],
-                      kernel_initializer=tf.truncated_normal_initializer(stddev=0.02)):
-            with tf.variable_scope('gen'):
-                image_gen = self.generator(z)
-            tf.summary.image('generated-samples', image_gen, max_outputs=30)
+    #     z = tf.random_normal([self.batch, self.zdim], name='z_train')
+    #     z = tf.placeholder_with_default(z, [None, self.zdim], name='z')
 
-            alpha = tf.random_uniform(shape=[self.batch, 1, 1, 1],
-                                      minval=0., maxval=1., name='alpha')
-            interp = image_pos + alpha * (image_gen - image_pos)
+    #     with argscope([Conv2D, Conv2DTranspose, FullyConnected],
+    #                   kernel_initializer=tf.truncated_normal_initializer(stddev=0.02)):
+    #         with tf.variable_scope('gen'):
+    #             image_gen = self.generator(z)
+    #         tf.summary.image('generated-samples', image_gen, max_outputs=30)
 
-            with tf.variable_scope('discrim'):
-                vecpos = self.discriminator(image_pos)
-                vecneg = self.discriminator(image_gen)
-                vec_interp = self.discriminator(interp)
+    #         alpha = tf.random_uniform(shape=[self.batch, 1, 1, 1],
+    #                                   minval=0., maxval=1., name='alpha')
+    #         interp = image_pos + alpha * (image_gen - image_pos)
 
-        # the Wasserstein-GAN losses
-        self.d_loss = tf.reduce_mean(vecneg - vecpos, name='d_loss')
-        self.g_loss = tf.negative(tf.reduce_mean(vecneg), name='g_loss')
+    #         with tf.variable_scope('discrim'):
+    #             vecpos = self.discriminator(image_pos)
+    #             vecneg = self.discriminator(image_gen)
+    #             vec_interp = self.discriminator(interp)
 
-        # the gradient penalty loss
-        gradients = tf.gradients(vec_interp, [interp])[0]
-        gradients = tf.sqrt(tf.reduce_sum(tf.square(gradients), [1, 2, 3]))
-        gradients_rms = tf.sqrt(tf.reduce_mean(tf.square(gradients)), name='gradient_rms')
-        gradient_penalty = tf.reduce_mean(tf.square(gradients - 1), name='gradient_penalty')
-        add_moving_summary(self.d_loss, self.g_loss, gradient_penalty, gradients_rms)
+    #     # the Wasserstein-GAN losses
+    #     self.d_loss = tf.reduce_mean(vecneg - vecpos, name='d_loss')
+    #     self.g_loss = tf.negative(tf.reduce_mean(vecneg), name='g_loss')
 
-        self.d_loss = tf.add(self.d_loss, 10 * gradient_penalty)
+    #     # the gradient penalty loss
+    #     gradients = tf.gradients(vec_interp, [interp])[0]
+    #     gradients = tf.sqrt(tf.reduce_sum(tf.square(gradients), [1, 2, 3]))
+    #     gradients_rms = tf.sqrt(tf.reduce_mean(tf.square(gradients)), name='gradient_rms')
+    #     gradient_penalty = tf.reduce_mean(tf.square(gradients - 1), name='gradient_penalty')
+    #     add_moving_summary(self.d_loss, self.g_loss, gradient_penalty, gradients_rms)
 
-        self.collect_variables()
+    #     self.d_loss = tf.add(self.d_loss, 10 * gradient_penalty)
+
+    #     self.collect_variables()
 
     def _get_optimizer(self):
         lr = symbolic_functions.get_scalar_var('learning_rate', 1e-4, summary=True)
