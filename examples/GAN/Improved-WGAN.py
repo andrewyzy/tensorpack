@@ -30,7 +30,7 @@ class Model(DCGAN.Model):
     # replace BatchNorm by LayerNorm
     @auto_reuse_variable_scope
     def discriminator(self, imgs):
-        nf = 64
+        nf = 16
         with argscope(Conv2D, activation=tf.identity, kernel_size=4, strides=2):
             l = (LinearWrap(imgs)
                  .Conv2D('conv0', nf, activation=tf.nn.leaky_relu)
@@ -57,8 +57,7 @@ class Model(DCGAN.Model):
 
     
 
-
-    def build_graph(self, inputs):
+    def build_graph(self, image_pos):
         image_pos = image_pos / 128.0 - 1
         z = tf.random_normal([32, 512], name='z_train')
         z = tf.placeholder_with_default(z, [None, 512], name='z')
@@ -74,6 +73,7 @@ class Model(DCGAN.Model):
                 vecpos = self.discriminator(image_pos)
                 vecneg = self.discriminator(image_gen)
                 vec_interp = self.discriminator(interp)
+
         self.d_loss = tf.reduce_mean(vecneg - vecpos, name='d_loss')
         self.g_loss = tf.negative(tf.reduce_mean(vecneg), name='g_loss')
         gradients = tf.gradients(vec_interp, [interp])[0]
