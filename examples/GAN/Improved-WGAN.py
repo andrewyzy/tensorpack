@@ -13,6 +13,9 @@ from tensorpack.tfutils.summary import add_moving_summary
 import DCGAN
 from GAN import SeparateGANTrainer
 
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior() 
+
 """
 Improved Wasserstein-GAN.
 See the docstring in DCGAN.py for usage.
@@ -45,7 +48,7 @@ class Model(DCGAN.Model):
     def build_graph(self, image_pos):
         image_pos = image_pos / 128.0 - 1
 
-        z = tf.random_normal([self.batch, self.zdim], name='z_train')
+        z = tf.random.normal([self.batch, self.zdim], name='z_train')
         z = tf.placeholder_with_default(z, [None, self.zdim], name='z')
 
         with argscope([Conv2D, Conv2DTranspose, FullyConnected],
@@ -99,3 +102,4 @@ if __name__ == '__main__':
             max_epoch=200,
             session_init=SmartInit(args.load)
         )
+

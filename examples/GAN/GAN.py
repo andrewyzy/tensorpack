@@ -12,6 +12,8 @@ from tensorpack.tfutils.tower import TowerContext, TowerFunc
 from tensorpack.utils import logger
 from tensorpack.utils.argtools import memoized_method
 
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior() 
 
 class GANModelDesc(ModelDescBase):
     def collect_variables(self, g_scope='gen', d_scope='discrim'):
@@ -200,3 +202,4 @@ class RandomZData(DataFlow):
     def __iter__(self):
         while True:
             yield [np.random.uniform(-1, 1, size=self.shape)]
+
