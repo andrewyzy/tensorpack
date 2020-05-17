@@ -166,7 +166,7 @@ def get_data():
     assert args.data
     imgs = glob.glob(args.data + '/*.png')
     print(imgs)
-    ds = ImageFromFile(imgs, channel=3, shuffle=True,resize=512)
+    ds = ImageFromFile(imgs, channel=3, shuffle=True)
     ds = AugmentImageComponent(ds, get_augmentors())
     ds = BatchData(ds, args.batch)
     ds = MultiProcessRunnerZMQ(ds, 5)
@@ -197,7 +197,7 @@ def get_args(default_batch=128, default_z_dim=100):
     parser.add_argument('--load-size', help='size to load the original images', type=int)
     parser.add_argument('--crop-size', help='crop the original images', type=int)
     parser.add_argument(
-        '--final-size', default=64, type=int,
+        '--final-size', default=512, type=int,
         help='resize to this shape as inputs to network')
     parser.add_argument('--z-dim', help='hidden dimension', type=int, default=default_z_dim)
     parser.add_argument('--batch', help='batch size', type=int, default=default_batch)
