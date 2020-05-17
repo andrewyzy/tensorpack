@@ -81,8 +81,8 @@ class Model(GANModelDesc):
               .LayerNorm('bn5').tf.nn.leaky_relu()
               .Conv2D('conv6', nf * 64)
               .LayerNorm('bn6').tf.nn.leaky_relu()
-              .FullyConnected('fct', 1, nl=tf.identity)())
-        return tf.reshape(l, [-1])
+              .FullyConnected('fct2', 1, nl=tf.identity)())
+        return l
 
     def build_graph(self, image_pos):
         image_pos = image_pos / 128.0 - 1
