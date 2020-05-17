@@ -52,7 +52,7 @@ class Model(GANModelDesc):
         l = FullyConnected('fc0', z, nf * 64 * 4 * 4, activation=tf.identity)
         l = tf.reshape(l, [-1, 4, 4, nf * 64])
         l = BNReLU(l)
-        with argscope(Conv2DTranspose, activation=BNReLU, kernel_size=4, strides=2):
+        with argscope(Deconv2D, activation=BNReLU, kernel_size=4, strides=2):
             l = Deconv2D('deconv1', l, [8, 8, nf * 32])
             l = Deconv2D('deconv2', l, [16, 16, nf * 16])
             l = Deconv2D('deconv3', l, [32, 32, nf*8])
