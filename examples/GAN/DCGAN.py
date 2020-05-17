@@ -111,7 +111,7 @@ def get_augmentors():
 
 def get_data():
     assert args.data
-    imgs = glob.glob(args.data + '/*.jpg')
+    imgs = glob.glob(args.data + '/*.png')
     ds = ImageFromFile(imgs, channel=3, shuffle=True)
     ds = AugmentImageComponent(ds, get_augmentors())
     ds = BatchData(ds, args.batch)
