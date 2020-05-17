@@ -33,7 +33,7 @@ class Model(DCGAN.Model):
         nf = 16
         with argscope(Conv2D, activation=tf.identity, kernel_size=4, strides=2):
             l = (LinearWrap(imgs)
-              .Conv2D('conv0', nf*8, activation=tf.nn.leaky_relu)
+              .Conv2D('conv0', nf, activation=tf.nn.leaky_relu)
               .Conv2D('conv1', nf * 2)
               .LayerNorm('ln1').tf.nn.leaky_relu()
               .Conv2D('conv2', nf * 4)
