@@ -78,6 +78,15 @@ class Model(GANModelDesc):
                 .Conv2D('conv3', nf * 8)
                 .BatchNorm('bn3')
                 .tf.nn.leaky_relu()
+                .Conv2D('conv4', nf * 16)
+                .BatchNorm('bn4')
+                .tf.nn.leaky_relu()
+                .Conv2D('conv5', nf * 32)
+                .BatchNorm('bn5')
+                .tf.nn.leaky_relu()
+                .Conv2D('conv6', nf * 64)
+                .BatchNorm('bn6')
+                .tf.nn.leaky_relu()
                 .FullyConnected('fct', 1)())
         return l
 
