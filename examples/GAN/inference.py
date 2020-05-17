@@ -6,7 +6,7 @@ from tensorpack.tfutils.summary import add_moving_summary
 from tensorpack.utils.globvars import globalns as G
 from tensorpack.tfutils.scope_utils import auto_reuse_variable_scope
 import tensorflow as tf
-from tensorpack.utils.globvars import globalns as opt
+
 import DCGAN
 
 G.BATCH = 32 
@@ -75,8 +75,8 @@ def get_args():
 	parser.add_argument('--load', help='load model',default='model/I-WGAN_CAE/model-620000.index')
 	parser.add_argument('--sample_dir', help='directory for generated examples',type=str,default='/media/kaicao/Data/Data/FingerprintSynthesis/tensorpack/I-WGAN_CAE_10M_JPEG/')
 	parser.add_argument('--num_images', help='number of fingerprint images ', type=int, default=250)
+	global args
 	args = parser.parse_args()
-	opt.use_argument(args)
 	if args.gpu:
 		os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
 	return args
