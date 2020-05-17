@@ -87,7 +87,7 @@ class Model(DCGAN.Model):
 
 if __name__ == '__main__':
     assert get_tf_version_tuple() >= (1, 4)
-    args = DCGAN.get_args(default_batch=64, default_z_dim=128)
+    args = DCGAN.get_args(default_batch=32, default_z_dim=512)
     M = Model(shape=args.final_size, batch=args.batch, z_dim=args.z_dim)
     if args.sample:
         DCGAN.sample(M, args.load)
@@ -101,4 +101,3 @@ if __name__ == '__main__':
             max_epoch=200,
             session_init=SmartInit(args.load)
         )
-
