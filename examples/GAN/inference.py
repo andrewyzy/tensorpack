@@ -17,23 +17,21 @@ class Model(DCGAN.Model):
 	@auto_reuse_variable_scope
 	def discriminator(self, imgs):
 		nf = 16
+		imgs = tf.reshape(imgs, [-1, 256, 256, 3])
 		with argscope(Conv2D, nl=tf.identity, kernel_shape=4, stride=2), \
-			 argscope(LeakyReLU, alpha=0.2):
-			 l = (LinearWrap(imgs)
-				 .Conv2D('conv0', nf, nl=LeakyReLU)
-				 .Conv2D('conv1', nf * 2)
-				 .LayerNorm('bn1').LeakyReLU()
-				 .Conv2D('conv2', nf * 4)
-				 .LayerNorm('bn2').LeakyReLU()
-				 .Conv2D('conv3', nf * 8)
-				 .LayerNorm('bn3').LeakyReLU()
-				 .Conv2D('conv4', nf * 16)
-				 .LayerNorm('bn4').LeakyReLU()
-				 .Conv2D('conv5', nf * 32)
-				 .LayerNorm('bn5').LeakyReLU()
-				 .Conv2D('conv6', nf * 64)
-				 .LayerNorm('bn6').LeakyReLU()
-				 .FullyConnected('fct', 1, nl=tf.identity)())
+                argscope(LeakyReLU, alpha=0.2):
+			l = (LinearWrap(imgs)
+                 .Conv2D('conv0', nf, nl=LeakyReLU)
+                 .Conv2D('conv1', nf * 2)
+                 .BatchNorm('bn1').LeakyReLU()
+                 .Conv2D('conv2', nf * 4)
+                 .BatchNorm('bn2').LeakyReLU()
+                 .Conv2D('conv3', nf * 8)
+                 .BatchNorm('bn3').LeakyReLU()
+                 .Conv2D('conv4', nf * 16)
+                 .BatchNorm('bn4').LeakyReLU()
+                 .Conv2D('conv5', nf * 32)
+                 .FullyConnected('fct', 1, nl=tf.identity)())
 		return l
 
 	def _build_graph(self, inputs):
@@ -73,7 +71,7 @@ def get_args():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--gpu', help='comma separated list of GPU(s) to use.')
 	parser.add_argument('--load', help='load model',default='model/I-WGAN_CAE/model-620000.index')
-	parser.add_argument('--sample_dir', help='directory for generated examples',type=str,default='/media/kaicao/Data/Data/FingerprintSynthesis/tensorpack/I-WGAN_CAE_10M_JPEG/')
+	parser.add_argument('--sample_dir', help='directory for generated examples',type=str,default='/output/')
 	parser.add_argument('--num_images', help='number of fingerprint images ', type=int, default=250)
 	global args
 	args = parser.parse_args()
