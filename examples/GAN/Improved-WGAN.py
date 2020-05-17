@@ -30,7 +30,7 @@ class Model(DCGAN.Model):
     # replace BatchNorm by LayerNorm
     @auto_reuse_variable_scope
     def discriminator(self, imgs):
-        nf = 64
+        nf = 16
         with argscope(Conv2D, activation=tf.identity, kernel_size=4, strides=2):
             l = (LinearWrap(imgs)
               .Conv2D('conv0', nf).tf.nn.leaky_relu()
@@ -88,7 +88,7 @@ class Model(DCGAN.Model):
 if __name__ == '__main__':
     assert get_tf_version_tuple() >= (1, 4)
     args = DCGAN.get_args(default_batch=32, default_z_dim=512)
-    M = Model(shape=args.final_size, batch=args.batch, z_dim=args.z_dim)
+    M = Model(shape=args.final_size, batch=32, z_dim=512)
     if args.sample:
         DCGAN.sample(M, args.load)
     else:

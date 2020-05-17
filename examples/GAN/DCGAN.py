@@ -81,7 +81,7 @@ class Model(GANModelDesc):
               .LayerNorm('bn5').tf.nn.leaky_relu()
               .Conv2D('conv6', nf * 64)
               .LayerNorm('bn6').tf.nn.leaky_relu()
-              .FullyConnected('fct2', 1, nl=tf.identity)())
+              .FullyConnected('fct', 1)())
         return l
 
     def build_graph(self, image_pos):
@@ -165,7 +165,7 @@ def get_args(default_batch=128, default_z_dim=100):
 
 if __name__ == '__main__':
     args = get_args()
-    M = Model(shape=args.final_size, batch=args.batch, z_dim=args.z_dim)
+    M = Model(shape=args.final_size, batch=32, z_dim=512)
     if args.sample:
         sample(M, args.load)
     else:
