@@ -52,7 +52,7 @@ class Model(DCGAN.Model):
     
 
 
-    def _build_graph(self, image_pos):
+    def build_graph(self, image_pos):
         image_pos = image_pos[0]
         image_pos = image_pos / 128.0 - 1
 
