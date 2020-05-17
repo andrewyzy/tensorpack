@@ -48,7 +48,7 @@ class Model(GANModelDesc):
 
     def generator(self, z):
         """ return an image generated from z"""
-        nf = 16
+        nf = 512
         l = FullyConnected('fc0', z, nf * 64 * 4 * 4, activation=tf.identity)
         l = tf.reshape(l, [-1, 4, 4, nf * 64])
         l = BNReLU(l)
