@@ -8,7 +8,9 @@ import glob
 import numpy as np
 import os
 import tensorflow as tf
-
+import timeit
+import imageio
+import skimage
 from tensorpack import *
 from tensorpack.tfutils.scope_utils import auto_reuse_variable_scope
 from tensorpack.utils.viz import stack_patches
@@ -38,6 +40,9 @@ A pretrained model on CelebA is at http://models.tensorpack.com/#GAN
 
 
 class Model(GANModelDesc):
+    def get_inputs(self):
+        return [InputDesc(tf.float32, (None, 256, 256, 3), 'input')]
+
     def __init__(self, shape, batch, z_dim):
         self.shape = shape
         self.batch = batch
@@ -182,7 +187,8 @@ def sample(model, model_path, output_name='gen/gen'):
         o = o * 128.0
         o = np.clip(o, 0, 255)
         o = o[:, :, :, ::-1]
-        stack_patches(o, nr_row=10, nr_col=10, viz=True)
+
+        imageio.imwrite('1.jpeg', o[0])
 
 
 def get_args(default_batch=32, default_z_dim=512):
@@ -203,6 +209,54 @@ def get_args(default_batch=32, default_z_dim=512):
     if args.gpu:
         os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
     return args
+
+def sample2(model, model_path,sample_path, num, output_name='gen/gen'):
+    config = PredictConfig(
+        session_init=SmartInit(model_path),
+        model=model,
+        input_names=['z'],
+        output_names=[output_name, 'z'])
+    graph = config._maybe_create_graph()
+    batch_size = 250
+    n = 0
+    with graph.as_default():
+        input = PlaceholderInput()
+        input.setup(config.model.get_inputs_desc())
+        with TowerContext('', is_training=False):
+            config.model.build_graph(input)
+        input_tensors = get_tensors_by_names(config.input_names)
+        output_tensors = get_tensors_by_names(config.output_names)
+        sess = config.session_creator.create_session()
+        config.session_init.init(sess)
+        if sess is None:
+            sess = tf.get_default_session()
+        start = timeit.default_timer()
+        if (num % batch_size != 0):
+            num_extra_img = num % batch_size
+            dp = [np.random.normal(-1, 1, size=(num_extra_img, opt.Z_DIM))]
+            feed = dict(zip(input_tensors, dp))
+            output = sess.run(output_tensors, feed_dict=feed)
+            o, zs = output[0] + 1, output[1]
+            for j in range(len(o)):
+                n = n + 1
+                img = o[j]
+                img = np.dot(img[..., :3], [0.299, 0.587, 0.114])
+                img = (img - np.min(img))/np.ptp(img)
+                imageio.imwrite('%s%09d.jpeg' % (sample_path,n), skimage.img_as_ubyte(img))
+        for i in  range(int(num/batch_size)):
+            dp = [np.random.normal(-1, 1, size=(batch_size, opt.Z_DIM))]
+            feed = dict(zip(input_tensors, dp))
+            output = sess.run(output_tensors, feed_dict=feed)
+            o, zs = output[0] + 1, output[1]
+            for j in range(len(o)):
+                n = n + 1
+                img = o[j]
+                img = np.dot(img[..., :3], [0.299, 0.587, 0.114])
+                img = (img - np.min(img))/np.ptp(img)
+                imageio.imwrite('%s%09d.jpeg' % (sample_path,n), skimage.img_as_ubyte(img))
+        print ("Images generated : ", str(num))
+        stop = timeit.default_timer()
+        print ("Time taken : ", str(stop - start))
 
 
 if __name__ == '__main__':

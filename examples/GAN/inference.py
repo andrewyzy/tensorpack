@@ -3,14 +3,10 @@ import argparse
 
 from tensorpack import *
 from tensorpack.tfutils.summary import add_moving_summary
-from tensorpack.utils.globvars import globalns as G
 from tensorpack.tfutils.scope_utils import auto_reuse_variable_scope
 import tensorflow as tf
 
 import DCGAN
-
-G.BATCH = 32 
-G.Z_DIM = 512 
 
 class Model(DCGAN.Model):
 
@@ -37,14 +33,14 @@ class Model(DCGAN.Model):
 	def _build_graph(self, inputs):
 		image_pos = inputs[0]
 		image_pos = image_pos / 128.0 - 1
-		z = tf.random_normal([G.BATCH, G.Z_DIM], name='z_train')
-		z = tf.placeholder_with_default(z, [None, G.Z_DIM], name='z')
+		z = tf.random_normal([32, 512], name='z_train')
+		z = tf.placeholder_with_default(z, [None, 512], name='z')
 		with argscope([Conv2D, Deconv2D, FullyConnected],
 					  W_init=tf.truncated_normal_initializer(stddev=0.02)):
 			with tf.variable_scope('gen'):
 				image_gen = self.generator(z)
 			tf.summary.image('generated-samples', image_gen, max_outputs=30)
-			alpha = tf.random_uniform(shape=[G.BATCH, 1, 1, 1],
+			alpha = tf.random_uniform(shape=[32, 1, 1, 1],
 									  minval=0., maxval=1., name='alpha')
 			interp = image_pos + alpha * (image_gen - image_pos)
 			with tf.variable_scope('discrim'):
@@ -81,4 +77,5 @@ def get_args():
 
 if __name__ == '__main__':
 	args = get_args()
-	DCGAN.sample2(Model(), args.load,args.sample_dir,num=args.num_images)
+	M = Model(shape=256, batch=32, z_dim=512)
+	DCGAN.sample2(M, args.load,args.sample_dir,num=args.num_images)
