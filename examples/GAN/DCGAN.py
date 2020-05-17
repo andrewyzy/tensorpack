@@ -6,7 +6,6 @@ import argparse
 from tensorpack import *
 from tensorpack.utils.viz import *
 from tensorpack.tfutils.scope_utils import auto_reuse_variable_scope
-from tensorpack.utils.globvars import globalns as opt
 import tensorflow as tf
 from tensorpack.tfutils.common import get_tensors_by_names
 from GAN import GANModelDesc
@@ -14,14 +13,15 @@ import timeit
 import imageio
 import skimage
 
-opt.SHAPE = 512
-opt.BATCH = 32 
-opt.Z_DIM = 512 
-
 
 class Model(GANModelDesc):
+    def __init__(self, shape, batch, z_dim):
+        self.shape = shape
+        self.batch = batch
+        self.zdim = z_dim
+
     def _get_inputs(self):
-        return [InputDesc(tf.float32, (None, opt.SHAPE, opt.SHAPE, 3), 'input')]
+        return [InputDesc(tf.float32, (None, self.shape, self.shape, 3), 'input')]
 
     def generator(self, z):
         nf = 16
