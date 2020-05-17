@@ -31,7 +31,7 @@ class Model(DCGAN.Model):
     @auto_reuse_variable_scope
     def discriminator(self, imgs):
         nf = 16
-        imgs = tf.reshape(l, [-1, 512, 512, 3])
+        imgs = tf.reshape(imgs, [-1, 512, 512, 3])
         with argscope(Conv2D, activation=tf.identity, kernel_size=4, strides=2):
             l = (LinearWrap(imgs)
               .Conv2D('conv0', nf, activation=tf.nn.leaky_relu)

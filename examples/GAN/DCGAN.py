@@ -66,7 +66,7 @@ class Model(GANModelDesc):
     @auto_reuse_variable_scope
     def discriminator(self, imgs):
         nf = 16
-        imgs = tf.reshape(l, [-1, 512, 512, 3])
+        imgs = tf.reshape(imgs, [-1, 512, 512, 3])
         with argscope(Conv2D, nl=tf.identity, kernel_shape=4, stride=2), \
                 argscope(LeakyReLU, alpha=0.2):
             l = (LinearWrap(imgs)
