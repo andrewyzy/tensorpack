@@ -66,6 +66,7 @@ class Model(GANModelDesc):
     @auto_reuse_variable_scope
     def discriminator(self, imgs):
         nf = 16
+        imgs = tf.reshape(l, [-1, 512, 512, 3])
         with argscope(Conv2D, nl=tf.identity, kernel_shape=4, stride=2), \
                 argscope(LeakyReLU, alpha=0.2):
             l = (LinearWrap(imgs)
@@ -188,7 +189,7 @@ def sample(model, model_path, output_name='gen/gen'):
         stack_patches(o, nr_row=10, nr_col=10, viz=True)
 
 
-def get_args(default_batch=128, default_z_dim=100):
+def get_args(default_batch=32, default_z_dim=512):
     parser = argparse.ArgumentParser()
     parser.add_argument('--gpu', help='comma separated list of GPU(s) to use.')
     parser.add_argument('--load', help='load model')
