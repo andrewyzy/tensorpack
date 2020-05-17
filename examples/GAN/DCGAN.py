@@ -83,15 +83,16 @@ class Model(GANModelDesc):
                  .BatchNorm('bn6').LeakyReLU()
                  .FullyConnected('fct', 1, nl=tf.identity)())
         return l
-
-    def build_graph(self, image_pos):
+    
+    def build_graph(self, inputs):
+        image_pos = inputs[0]
         image_pos = image_pos / 128.0 - 1
 
         z = tf.random.uniform([self.batch, self.zdim], -1, 1, name='z_train')
         z = tf.placeholder_with_default(z, [None, self.zdim], name='z')
 
-        with argscope([Conv2D, Conv2DTranspose, FullyConnected],
-                      kernel_initializer=tf.truncated_normal_initializer(stddev=0.02)):
+        with argscope([Conv2D, Deconv2D, FullyConnected],
+                      W_init=tf.truncated_normal_initializer(stddev=0.02)):
             with tf.variable_scope('gen'):
                 image_gen = self.generator(z)
             tf.summary.image('generated-samples', image_gen, max_outputs=30)
