@@ -47,41 +47,36 @@ class Model(GANModelDesc):
         return [tf.TensorSpec((None, self.shape, self.shape, 3), tf.float32, 'input')]
 
     def generator(self, z):
-        nf = 16
-        l = FullyConnected('fc0', z, nf * 64 * 4 * 4, nl=tf.identity)
-        l = tf.reshape(l, [-1, 4, 4, nf * 64])
+        """ return an image generated from z"""
+        nf = 64
+        l = FullyConnected('fc0', z, nf * 8 * 4 * 4, activation=tf.identity)
+        l = tf.reshape(l, [-1, 4, 4, nf * 8])
         l = BNReLU(l)
-        with argscope(Deconv2D, nl=BNReLU, kernel_shape=4, stride=2):
-            l = Deconv2D('deconv1', l, [8, 8, nf * 32])
-            l = Deconv2D('deconv2', l, [16, 16, nf * 16])
-            l = Deconv2D('deconv3', l, [32, 32, nf*8])
-            l = Deconv2D('deconv4', l, [64, 64, nf * 4])
-            l = Deconv2D('deconv5', l, [128, 128, nf * 2])
-            l = Deconv2D('deconv6', l, [256, 256, nf * 1])
-            l = Deconv2D('deconv7', l, [512, 512, 3], nl=tf.identity)
+        with argscope(Conv2DTranspose, activation=BNReLU, kernel_size=4, strides=2):
+            l = Conv2DTranspose('deconv1', l, nf * 4)
+            l = Conv2DTranspose('deconv2', l, nf * 2)
+            l = Conv2DTranspose('deconv3', l, nf)
+            l = Conv2DTranspose('deconv4', l, 3, activation=tf.identity)
             l = tf.tanh(l, name='gen')
         return l
 
     @auto_reuse_variable_scope
     def discriminator(self, imgs):
-        nf = 16
-        with argscope(Conv2D, nl=tf.identity, kernel_shape=4, stride=2), \
-                argscope(LeakyReLU, alpha=0.2):
+        """ return a (b, 1) logits"""
+        nf = 64
+        with argscope(Conv2D, kernel_size=4, strides=2):
             l = (LinearWrap(imgs)
-                 .Conv2D('conv0', nf, nl=LeakyReLU)
+                 .Conv2D('conv0', nf, activation=tf.nn.leaky_relu)
                  .Conv2D('conv1', nf * 2)
-                 .BatchNorm('bn1').LeakyReLU()
+                 .BatchNorm('bn1')
+                 .tf.nn.leaky_relu()
                  .Conv2D('conv2', nf * 4)
-                 .BatchNorm('bn2').LeakyReLU()
+                 .BatchNorm('bn2')
+                 .tf.nn.leaky_relu()
                  .Conv2D('conv3', nf * 8)
-                 .BatchNorm('bn3').LeakyReLU()
-                 .Conv2D('conv4', nf * 16)
-                 .BatchNorm('bn4').LeakyReLU()
-                 .Conv2D('conv5', nf * 32)
-                 .BatchNorm('bn5').LeakyReLU()
-                 .Conv2D('conv6', nf * 64)
-                 .BatchNorm('bn6').LeakyReLU()
-                 .FullyConnected('fct', 1, nl=tf.identity)())
+                 .BatchNorm('bn3')
+                 .tf.nn.leaky_relu()
+                 .FullyConnected('fct', 1)())
         return l
     
     def build_graph(self, inputs):
