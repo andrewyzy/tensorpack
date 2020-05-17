@@ -79,7 +79,7 @@ class Model(GANModelDesc):
     def build_graph(self, image_pos):
         image_pos = image_pos / 128.0 - 1
 
-        z = tf.random_uniform([self.batch, self.zdim], -1, 1, name='z_train')
+        z = tf.random.uniform([self.batch, self.zdim], -1, 1, name='z_train')
         z = tf.placeholder_with_default(z, [None, self.zdim], name='z')
 
         with argscope([Conv2D, Conv2DTranspose, FullyConnected],
