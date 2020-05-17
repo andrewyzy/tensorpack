@@ -61,8 +61,8 @@ class Model(DCGAN.Model):
         image_pos = image_pos / 128.0 - 1
         z = tf.random_normal([32, 512], name='z_train')
         z = tf.placeholder_with_default(z, [None, 512], name='z')
-        with argscope([Conv2D, Deconv2D, FullyConnected],
-					  W_init=tf.truncated_normal_initializer(stddev=0.02)):
+        with argscope([Conv2D, Conv2DTranspose, FullyConnected],
+					  kernel_initializer=tf.truncated_normal_initializer(stddev=0.02)):
             with tf.variable_scope('gen'):
                 image_gen = self.generator(z)
             tf.summary.image('generated-samples', image_gen, max_outputs=30)
