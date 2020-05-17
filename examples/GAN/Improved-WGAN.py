@@ -60,8 +60,8 @@ class Model(DCGAN.Model):
     def build_graph(self, image_pos):
         image_pos = image_pos / 128.0 - 1
 
-        z = tf.random_normal([self.batch, self.zdim], name='z_train')
-        z = tf.placeholder_with_default(z, [None, self.zdim], name='z')
+        z = tf.random_normal([32, 512], name='z_train')
+        z = tf.placeholder_with_default(z, [None, 512], name='z')
 
         with argscope([Conv2D, Conv2DTranspose, FullyConnected],
                       kernel_initializer=tf.truncated_normal_initializer(stddev=0.02)):
@@ -69,7 +69,7 @@ class Model(DCGAN.Model):
                 image_gen = self.generator(z)
             tf.summary.image('generated-samples', image_gen, max_outputs=30)
 
-            alpha = tf.random_uniform(shape=[self.batch, 1, 1, 1],
+            alpha = tf.random_uniform(shape=[32, 1, 1, 1],
                                       minval=0., maxval=1., name='alpha')
             interp = image_pos + alpha * (image_gen - image_pos)
 
