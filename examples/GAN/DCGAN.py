@@ -84,6 +84,27 @@ class Model(GANModelDesc):
         lr = symbolic_functions.get_scalar_var('learning_rate', 2e-4, summary=True)
         return tf.train.AdamOptimizer(lr, beta1=0.5, epsilon=1e-3)
 
+    
+    def get_args(default_batch=128, default_z_dim=100):
+        parser = argparse.ArgumentParser()
+        parser.add_argument('--gpu', help='comma separated list of GPU(s) to use.')
+        parser.add_argument('--load', help='load model')
+        parser.add_argument('--sample', action='store_true', help='view generated examples')
+        parser.add_argument('--data', help='a jpeg directory')
+        parser.add_argument('--load-size', help='size to load the original images', type=int)
+        parser.add_argument('--crop-size', help='crop the original images', type=int)
+        parser.add_argument(
+            '--final-size', default=64, type=int,
+            help='resize to this shape as inputs to network')
+        parser.add_argument('--z-dim', help='hidden dimension', type=int, default=default_z_dim)
+        parser.add_argument('--batch', help='batch size', type=int, default=default_batch)
+        global args
+        args = parser.parse_args()
+        if args.gpu:
+            os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
+        return args
+
+
 def sample2(model, model_path,sample_path, num, output_name='gen/gen'):
     config = PredictConfig(
         session_init=get_model_loader(model_path),
