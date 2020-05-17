@@ -67,7 +67,7 @@ class Model(GANModelDesc):
     def discriminator(self, imgs):
         """ return a (b, 1) logits"""
         nf = 16
-        with argscope(Conv2D, kernel_size=4, strides=2):
+        with argscope(Conv2D, kernel_size=4, strides=2,nl=tf.identity,):
             l = (LinearWrap(imgs)
                  .Conv2D('conv0', nf, activation=tf.nn.leaky_relu)
                  .Conv2D('conv1', nf * 2)
@@ -88,7 +88,7 @@ class Model(GANModelDesc):
                  .Conv2D('conv6', nf * 64)
                  .BatchNorm('bn3')
                  .tf.nn.leaky_relu()
-                 .FullyConnected('fct', 1)())
+                 .FullyConnected('fct', 1, nl=tf.identity)())
         return l
 
     def build_graph(self, image_pos):
