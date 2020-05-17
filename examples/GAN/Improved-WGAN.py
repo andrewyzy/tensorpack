@@ -28,27 +28,27 @@ See the docstring in DCGAN.py for usage.
 
 class Model(DCGAN.Model):
     # replace BatchNorm by LayerNorm
-    @auto_reuse_variable_scope
-    def discriminator(self, imgs):
-        nf = 16
-        with argscope(Conv2D, activation=tf.identity, kernel_size=4, strides=2):
-            l = (LinearWrap(imgs)
-              .Conv2D('conv0', nf, activation=tf.nn.leaky_relu)
-              .Conv2D('conv1', nf * 2)
-              .LayerNorm('ln1').tf.nn.leaky_relu()
-              .Conv2D('conv2', nf * 4)
-              .LayerNorm('ln2').tf.nn.leaky_relu()
-              .Conv2D('conv3', nf * 8)
-              .LayerNorm('ln3').tf.nn.leaky_relu()
-              .Conv2D('conv4', nf * 16)
-              .LayerNorm('ln4').tf.nn.leaky_relu()
-              .Conv2D('conv5', nf * 32)
-              .LayerNorm('ln5').tf.nn.leaky_relu()
-              .Conv2D('conv6', nf * 64)
-              .LayerNorm('ln6').tf.nn.leaky_relu()
-              .FullyConnected('fct', 1, nl=tf.identity)())
-        return tf.reshape(l, [-1])
-
+	@auto_reuse_variable_scope
+	def discriminator(self, imgs):
+		nf = 16
+		with argscope(Conv2D, nl=tf.identity, kernel_shape=4, stride=2), \
+			 argscope(LeakyReLU, alpha=0.2):
+			 l = (LinearWrap(imgs)
+				 .Conv2D('conv0', nf, nl=LeakyReLU)
+				 .Conv2D('conv1', nf * 2)
+				 .LayerNorm('bn1').LeakyReLU()
+				 .Conv2D('conv2', nf * 4)
+				 .LayerNorm('bn2').LeakyReLU()
+				 .Conv2D('conv3', nf * 8)
+				 .LayerNorm('bn3').LeakyReLU()
+				 .Conv2D('conv4', nf * 16)
+				 .LayerNorm('bn4').LeakyReLU()
+				 .Conv2D('conv5', nf * 32)
+				 .LayerNorm('bn5').LeakyReLU()
+				 .Conv2D('conv6', nf * 64)
+				 .LayerNorm('bn6').LeakyReLU()
+				 .FullyConnected('fct', 1, nl=tf.identity)())
+		return l
     
 
 
@@ -96,7 +96,7 @@ class Model(DCGAN.Model):
 
 if __name__ == '__main__':
     assert get_tf_version_tuple() >= (1, 4)
-    args = DCGAN.get_args(default_batch=64, default_z_dim=128)
+    args = DCGAN.get_args(default_batch=32, default_z_dim=512)
     M = Model(shape=args.final_size, batch=args.batch, z_dim=args.z_dim)
     if args.sample:
         DCGAN.sample(M, args.load)
