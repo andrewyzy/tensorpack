@@ -15,6 +15,9 @@ from tensorpack.utils.viz import stack_patches
 
 from GAN import GANModelDesc, GANTrainer, RandomZData
 
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior() 
+
 
 """
 1. Download the 'aligned&cropped' version of CelebA dataset
