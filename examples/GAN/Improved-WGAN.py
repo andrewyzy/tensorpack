@@ -33,26 +33,31 @@ class Model(DCGAN.Model):
         nf = 16
         with argscope(Conv2D, activation=tf.identity, kernel_size=4, strides=2):
             l = (LinearWrap(imgs)
-              .Conv2D('conv0', nf).tf.nn.leaky_relu()
-              .Conv2D('conv1', nf * 2)
-              .LayerNorm('bn1').tf.nn.leaky_relu()
-              .Conv2D('conv2', nf * 4)
-              .LayerNorm('bn2').tf.nn.leaky_relu()
-              .Conv2D('conv3', nf * 8)
-              .LayerNorm('bn3').tf.nn.leaky_relu()
-              .Conv2D('conv4', nf * 16)
-              .LayerNorm('bn4').tf.nn.leaky_relu()
-              .Conv2D('conv5', nf * 32)
-              .LayerNorm('bn5').tf.nn.leaky_relu()
-              .Conv2D('conv6', nf * 64)
-              .LayerNorm('bn6').tf.nn.leaky_relu()
-              .FullyConnected('fct', 1, activation=tf.identity)())
+                 .Conv2D('conv0', nf, activation=tf.nn.leaky_relu)
+                 .Conv2D('conv1', nf * 2)
+                 .LayerNorm('ln1')
+                 .tf.nn.leaky_relu()
+                 .Conv2D('conv2', nf * 4)
+                 .LayerNorm('ln2')
+                 .tf.nn.leaky_relu()
+                 .Conv2D('conv3', nf * 8)
+                 .LayerNorm('ln3')
+                 .tf.nn.leaky_relu()
+                 .Conv2D('conv4', nf * 16)
+                 .LayerNorm('ln4')
+                 .tf.nn.leaky_relu()
+                 .Conv2D('conv5', nf * 32)
+                 .LayerNorm('ln5')
+                 .tf.nn.leaky_relu()
+                 .Conv2D('conv6', nf * 64)
+                 .LayerNorm('ln6')
+                 .tf.nn.leaky_relu()
+                 .FullyConnected('fct', 1, activation=tf.identity)())
         return tf.reshape(l, [-1])
 
     
 
     def _build_graph(self, inputs):
-        image_pos = inputs[0]
         image_pos = image_pos / 128.0 - 1
         z = tf.random_normal([G.BATCH, G.Z_DIM], name='z_train')
         z = tf.placeholder_with_default(z, [None, G.Z_DIM], name='z')
