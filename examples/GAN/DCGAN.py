@@ -182,13 +182,15 @@ def sample(model, model_path, output_name='gen/gen'):
         input_names=['z'],
         output_names=[output_name, 'z'])
     pred = SimpleDatasetPredictor(pred, RandomZData((100, args.z_dim)))
+    i = 0
     for o in pred.get_result():
         o = o[0] + 1
         o = o * 128.0
         o = np.clip(o, 0, 255)
         o = o[:, :, :, ::-1]
 
-        imageio.imwrite('1.jpeg', o[0])
+        imageio.imwrite("output/"+str(i)+".png", o[i])
+        i+=1
 
 
 def get_args(default_batch=32, default_z_dim=512):
